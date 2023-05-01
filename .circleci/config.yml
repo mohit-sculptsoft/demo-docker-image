@@ -1,0 +1,20 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: docker:19.03.13
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker Image
+          command: |
+            docker build -t demo-docker-image:$CIRCLE_SHA1 .
+            docker tag demo-docker-image:$CIRCLE_SHA1 demo-docker-image:latest
+            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+            docker push demo-docker-image:$CIRCLE_SHA1
+            docker push demo-docker-image:latest
+workflows:
+  build:
+    jobs:
+      - build
